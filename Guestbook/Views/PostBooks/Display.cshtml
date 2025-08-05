@@ -1,0 +1,89 @@
+﻿@model Guestbook.Models.Book
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="card mb-3">
+    <div class="row g-1">
+        <div class="col-md-4">
+            @if(Model.Photo != null)
+            {
+               <img src="~/Photos/@Model.Photo" class="img-fluid rounded-start" />  
+            }
+            else
+            { 
+                <img src="~/Photos/penguin640.png" class="img-fluid rounded-start" />
+            }
+            
+        </div>
+        <div class="card col-md-8 d-flex flex-column">
+            <div class="card-body flex-grow-1">
+                <h4 class="card-title">@Html.DisplayFor(modelItem => Model.Title)</h4>
+                <p class="card-text">@Html.Raw(Model.Description.Replace("\r\n", "<br>"))</p>
+            </div>
+            <div class="card-footer mt-auto">
+                <p class="card-text text-end">
+                    <small class="text-body-secondary">
+                        @Html.DisplayFor(modelItem => Model.Author) 於 @Html.DisplayFor(modelItem => Model.CreateDate)
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+<div id="RebooksForm" class="bg-dark bg-opacity-10 p-4 rounded-pill">
+    
+</div>
+
+
+<hr />
+<div id="ReBookList">
+    @await Component.InvokeAsync("VCRebooks", new { bookId = Model.BookID })
+</div>
+
+<div>
+    <a asp-action="Index">回到留言版</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $('#RebooksForm').load('/Rebooks/Create?BookID=@Model.BookID',function(){
+            $.validator.unobtrusive.parse($('#RebooksForm'));
+        });
+
+        function addReBook()
+        {
+            console.log($('#RebooksForm form').serialize());
+            $.ajax({
+                    type:"Post",
+                    url:"/Rebooks/Create",
+                    data: $('#RebooksForm form').serialize(),
+                    success:function(){
+
+                        
+                        $('#ReBookList').load('/Rebooks/GetReBookByViewComponent?BookID=@Model.BookID');
+
+                       
+                        $('#RebooksForm').load('/ReBooks/Create?BookID=@(Model.BookID)',function(){
+                            $.validator.unobtrusive.parse($('#ReBookForm'));
+                        });
+
+
+                    },
+                    error:function(){
+
+                    }
+            });
+        }
+        
+
+    </script>
+}
+
+                 
